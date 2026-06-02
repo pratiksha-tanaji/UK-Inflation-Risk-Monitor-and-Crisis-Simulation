@@ -5,9 +5,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 
-# ============================================================
-# PAGE CONFIG
-# ============================================================
 st.set_page_config(
     page_title="UK INFLATION RISK MONITOR",
     page_icon="📊",
@@ -15,9 +12,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ============================================================
-# STYLING
-# ============================================================
 st.markdown(
     """
     <style>
@@ -308,9 +302,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ============================================================
-# HELPERS
-# ============================================================
 def classify_inflation_risk(inflation: float) -> str:
     if pd.isna(inflation):
         return "Unknown"
@@ -322,7 +313,6 @@ def classify_inflation_risk(inflation: float) -> str:
         return "High Risk"
     return "Crisis Level"
 
-
 def risk_css_class(label: str) -> str:
     return {
         "Low Risk": "risk-low",
@@ -330,7 +320,6 @@ def risk_css_class(label: str) -> str:
         "High Risk": "risk-high",
         "Crisis Level": "risk-crisis",
     }.get(label, "risk-moderate")
-
 
 def safe_read_csv(path: str) -> pd.DataFrame:
     try:
@@ -341,12 +330,11 @@ def safe_read_csv(path: str) -> pd.DataFrame:
     except Exception:
         return pd.DataFrame()
 
-
 @st.cache_data
 def load_base_files():
-    master_df = safe_read_csv("data/master_dataset.csv")
-    pred_df = safe_read_csv("data/inflation_predictions.csv")
-    feat_df = safe_read_csv("data/feature_importance.csv")
+    master_df = safe_read_csv("master_dataset.csv")
+    pred_df = safe_read_csv("inflation_predictions.csv")
+    feat_df = safe_read_csv("feature_importance.csv")
 
     for df in [master_df, pred_df]:
         if not df.empty and "Date" in df.columns:
@@ -358,13 +346,11 @@ def load_base_files():
 
     return master_df, pred_df, feat_df
 
-
 def latest_non_null(df: pd.DataFrame, col: str):
     if df.empty or col not in df.columns:
         return np.nan
     s = df[col].dropna()
     return s.iloc[-1] if not s.empty else np.nan
-
 
 def build_plotly_layout(fig, height=400):
     fig.update_layout(
@@ -384,7 +370,6 @@ def build_plotly_layout(fig, height=400):
     )
     return fig
 
-
 def prepare_feature_importance(feat_df: pd.DataFrame) -> pd.DataFrame:
     if feat_df.empty:
         return pd.DataFrame(columns=["Feature", "Importance"])
@@ -400,7 +385,6 @@ def prepare_feature_importance(feat_df: pd.DataFrame) -> pd.DataFrame:
     temp = temp[["Feature", "Importance"]].copy()
     temp["Importance"] = pd.to_numeric(temp["Importance"], errors="coerce")
     return temp.dropna(subset=["Importance"]).sort_values("Importance", ascending=False)
-
 
 def plain_language_driver_summary(feat_df: pd.DataFrame) -> str:
     if feat_df.empty:
@@ -428,7 +412,6 @@ def plain_language_driver_summary(feat_df: pd.DataFrame) -> str:
         return f"The forecast is currently influenced most by {readable[0]}."
     return f"The forecast is currently influenced most by {', '.join(readable[:-1])} and {readable[-1]}."
 
-
 def proxy_future_prediction(row, history_row):
     base = float(history_row.get("Inflation_YoY", 4.0))
     pred = (
@@ -440,7 +423,6 @@ def proxy_future_prediction(row, history_row):
         - 0.10 * (float(row["Market_Change"]) - float(history_row.get("Market_Change", row["Market_Change"])))
     )
     return round(pred, 2)
-
 
 def make_history_reference(master_df: pd.DataFrame) -> pd.Series:
     defaults = {
@@ -487,7 +469,6 @@ def make_history_reference(master_df: pd.DataFrame) -> pd.Series:
         "Market_Change": float(latest.get("Market_Change", defaults["Market_Change"])) if not pd.isna(latest.get("Market_Change", np.nan)) else defaults["Market_Change"],
     })
 
-
 def forecast_future_inflation(uploaded_future_df: pd.DataFrame, history_ref: pd.Series) -> pd.DataFrame:
     scenario = uploaded_future_df.copy()
     scenario["Date"] = pd.to_datetime(scenario["Date"], errors="coerce")
@@ -515,7 +496,6 @@ def forecast_future_inflation(uploaded_future_df: pd.DataFrame, history_ref: pd.
 
     return pd.DataFrame(preds)
 
-
 def inflation_risk_score(inflation):
     if pd.isna(inflation):
         return 0
@@ -526,7 +506,6 @@ def inflation_risk_score(inflation):
     if inflation >= 3:
         return 1
     return 0
-
 
 def gdp_risk_score(gdp_growth):
     if pd.isna(gdp_growth):
@@ -539,7 +518,6 @@ def gdp_risk_score(gdp_growth):
         return 1
     return 0
 
-
 def unemployment_risk_score(unemp):
     if pd.isna(unemp):
         return 0
@@ -550,7 +528,6 @@ def unemployment_risk_score(unemp):
     if unemp >= 5.0:
         return 1
     return 0
-
 
 def bank_rate_risk_score(rate):
     if pd.isna(rate):
@@ -563,7 +540,6 @@ def bank_rate_risk_score(rate):
         return 1
     return 0
 
-
 def retail_risk_score(rsi):
     if pd.isna(rsi):
         return 0
@@ -574,7 +550,6 @@ def retail_risk_score(rsi):
     if rsi < 102:
         return 1
     return 0
-
 
 def market_risk_score(market_change):
     if pd.isna(market_change):
@@ -587,7 +562,6 @@ def market_risk_score(market_change):
         return 1
     return 0
 
-
 def crisis_status(total_score):
     if total_score <= 3:
         return "No Crisis"
@@ -597,7 +571,6 @@ def crisis_status(total_score):
         return "Moderate Risk Crisis Detected"
     return "High Risk Crisis Detected"
 
-
 def crisis_status_css(status):
     if "No Crisis" in status:
         return "assessment-low"
@@ -606,7 +579,6 @@ def crisis_status_css(status):
     if "Moderate Risk" in status:
         return "assessment-high"
     return "assessment-crisis"
-
 
 def triggered_conditions_text(inflation_score, gdp_score, unemp_score, bank_score, retail_score, market_score):
     triggers = []
@@ -646,10 +618,8 @@ def triggered_conditions_text(inflation_score, gdp_score, unemp_score, bank_scor
 
     return "Crisis risk is indicated because " + ", ".join(triggers) + "."
 
-
 def confidence_of_indication(total_score):
     return int(round(min(95, max(35, 35 + total_score * 6))))
-
 
 def confidence_level_label(conf_pct):
     if conf_pct < 50:
@@ -657,7 +627,6 @@ def confidence_level_label(conf_pct):
     if conf_pct < 75:
         return "Moderate Confidence"
     return "High Confidence"
-
 
 def indicator_status_label(score):
     return {
@@ -667,12 +636,10 @@ def indicator_status_label(score):
         3: "Critical",
     }.get(score, "Normal")
 
-
 def inflation_vs_target(inflation, target=2.0):
     if pd.isna(inflation):
         return np.nan
     return round(inflation - target, 2)
-
 
 def risk_direction(pred_df):
     if pred_df.empty or "Predicted_Inflation" not in pred_df.columns:
@@ -687,7 +654,6 @@ def risk_direction(pred_df):
         return "Easing"
     return "Stable"
 
-
 def most_pressured_indicators(score_map):
     if not score_map:
         return "None"
@@ -695,7 +661,6 @@ def most_pressured_indicators(score_map):
     if max_score <= 0:
         return "None"
     return ", ".join([k for k, v in score_map.items() if v == max_score])
-
 
 def policy_view_text(risk_label, forecast_inflation):
     if pd.isna(forecast_inflation):
@@ -708,7 +673,6 @@ def policy_view_text(risk_label, forecast_inflation):
         return "Inflation pressure is materially elevated and may require sustained policy restraint."
     return "Inflation conditions are severe and consistent with crisis-level stress."
 
-
 def market_view_text(direction):
     if direction == "Worsening":
         return "Recent forecasts suggest risk is building rather than easing."
@@ -716,13 +680,11 @@ def market_view_text(direction):
         return "Recent forecasts suggest inflation stress may be moderating."
     return "Recent forecasts suggest broadly stable inflation conditions."
 
-
 def scenario_summary_text(status, scenario_pred, conf_pct, stressed):
     return (
         f"Scenario outcome: {status}. Forecast inflation is {scenario_pred:.2f}%, "
         f"with confidence of indication at {conf_pct}%. Most pressured indicator(s): {stressed}."
     )
-
 
 def create_snapshot_text(current_inflation, forecast_inflation, forecast_range_text, risk_label, target_gap, direction):
     lines = [
@@ -738,7 +700,6 @@ def create_snapshot_text(current_inflation, forecast_inflation, forecast_range_t
     ]
     return "\n".join(lines)
 
-
 def create_template_csv():
     dates = pd.date_range("2025-01-01", periods=12, freq="MS")
     template_df = pd.DataFrame({
@@ -751,20 +712,13 @@ def create_template_csv():
     })
     return template_df.to_csv(index=False).encode("utf-8")
 
-
-# ============================================================
-# LOAD DATA
-# ============================================================
 master_df, pred_df, feat_df = load_base_files()
 feat_df = prepare_feature_importance(feat_df)
 
 if master_df.empty or pred_df.empty:
-    st.error("Required files missing. Please ensure master_dataset.csv and inflation_predictions.csv are inside the data/ folder.")
+    st.error("Please keep master_dataset.csv and inflation_predictions.csv in the same folder as app.py.")
     st.stop()
 
-# ============================================================
-# SIDEBAR
-# ============================================================
 st.sidebar.title("Dashboard Filters")
 st.sidebar.caption("Designed for policy and market-facing users.")
 
@@ -808,9 +762,6 @@ scenario_file = st.sidebar.file_uploader(
     key="scenario"
 )
 
-# ============================================================
-# FILTER DATA
-# ============================================================
 filtered_master = master_df.copy()
 filtered_pred = pred_df.copy()
 
@@ -823,9 +774,6 @@ if date_range and isinstance(date_range, tuple) and len(date_range) == 2:
     if "Date" in filtered_pred.columns:
         filtered_pred = filtered_pred[(filtered_pred["Date"] >= start_date) & (filtered_pred["Date"] <= end_date)]
 
-# ============================================================
-# KPI VALUES
-# ============================================================
 current_inflation = latest_non_null(filtered_pred, "Actual_Inflation")
 if pd.isna(current_inflation):
     current_inflation = latest_non_null(filtered_master, "Inflation_YoY")
@@ -844,9 +792,6 @@ market_text = market_view_text(direction)
 snapshot_text = create_snapshot_text(current_inflation, forecast_inflation, forecast_range_text, risk_label, target_gap, direction)
 target_gap_text = "N/A" if pd.isna(target_gap) else f"{target_gap:+.2f} pp"
 
-# ============================================================
-# MINIMAL HERO HEADER
-# ============================================================
 hero_html = (
     '<div class="hero">'
     '<div class="hero-title">UK INFLATION RISK MONITOR 📊</div>'
@@ -862,9 +807,6 @@ hero_html = (
 
 st.markdown(hero_html, unsafe_allow_html=True)
 
-# ============================================================
-# KPI ROW - CLEAN FIRST VIEW
-# ============================================================
 k1, k2, k3, k4 = st.columns(4, gap="large")
 
 with k1:
@@ -911,18 +853,12 @@ with k4:
         unsafe_allow_html=True,
     )
 
-# ============================================================
-# TABS
-# ============================================================
 tab1, tab2, tab3 = st.tabs([
     "Executive Overview",
     "Scenario Simulator",
     "Market & Policy Signals",
 ])
 
-# ============================================================
-# TAB 1: EXECUTIVE OVERVIEW
-# ============================================================
 with tab1:
     left, right = st.columns([2.25, 1], gap="large")
 
@@ -1091,9 +1027,6 @@ with tab1:
         )
         st.markdown("</div>", unsafe_allow_html=True)
 
-# ============================================================
-# TAB 2: SCENARIO SIMULATOR
-# ============================================================
 with tab2:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.subheader("Scenario Simulator")
@@ -1318,9 +1251,6 @@ with tab2:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ============================================================
-# TAB 3: MARKET & POLICY SIGNALS
-# ============================================================
 with tab3:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.subheader("Market & Policy Signals")
@@ -1393,8 +1323,5 @@ with tab3:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ============================================================
-# FOOTER
-# ============================================================
 st.markdown("---")
 st.caption("User-facing dashboard version for policy and financial decision support. The scenario workflow uses a downloadable template plus sidebar upload for structured future assumptions.")
