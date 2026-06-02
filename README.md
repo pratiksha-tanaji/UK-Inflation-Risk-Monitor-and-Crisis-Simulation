@@ -94,11 +94,13 @@ Random Forest achieved the best overall forecasting performance and was selected
 ![Market & Policy Signals](screenshots/Market_policy_signals.png)
 ---
 
+## Dashboard Evolution
+
 The project initially explored Power BI for visualization and reporting. As the scope expanded to include scenario simulation, user-driven forecasting and future data uploads, the implementation was migrated to Streamlit for greater flexibility and interactivity.
 
 ### Initial Power BI Prototype
 
-![Power BI Dashboard](screenshots/powerbi_dashboard.png)
+![Power BI Dashboard](screenshots/powerbi.jpeg)
 
 ## Technologies Used
 
