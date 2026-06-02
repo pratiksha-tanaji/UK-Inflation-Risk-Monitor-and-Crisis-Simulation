@@ -332,9 +332,9 @@ def safe_read_csv(path: str) -> pd.DataFrame:
 
 @st.cache_data
 def load_base_files():
-    master_df = safe_read_csv("master_dataset.csv")
-    pred_df = safe_read_csv("inflation_predictions.csv")
-    feat_df = safe_read_csv("feature_importance.csv")
+    master_df = safe_read_csv("data/master_dataset.csv")
+    pred_df = safe_read_csv("data/inflation_predictions.csv")
+    feat_df = safe_read_csv("data/feature_importance.csv")
 
     for df in [master_df, pred_df]:
         if not df.empty and "Date" in df.columns:
