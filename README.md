@@ -77,18 +77,21 @@ Random Forest achieved the best overall forecasting performance and was selected
 
 ## Dashboard Preview
 
+### Dashboard Overview
+
+![Dashboard Overview](screenshots/Dashboard_overview.png)
+
 ### Executive Overview
 
-(Add Dashboard_overview.png)
+![Executive Overview](screenshots/Executive_summary.png)
 
 ### Scenario Simulator
 
-(Add Scenario_simulator.png)
+![Scenario Simulator](screenshots/Scenario_simulator.png)
 
 ### Market & Policy Signals
 
-(Add Market_policy_signals.png)
-
+![Market & Policy Signals](screenshots/Market_policy_signals.png)
 ---
 
 ## Technologies Used
