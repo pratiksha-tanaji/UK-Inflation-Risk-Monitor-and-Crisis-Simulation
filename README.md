@@ -10,6 +10,10 @@ The system combines economic forecasting, crisis risk assessment, and interactiv
 
 ---
 
+## Live Dashboard
+
+[Launch the Streamlit Dashboard](https://uk-inflation-risk-monitor-and-crisis-simulation-ax8yi4rr8k44vq.streamlit.app)
+
 ## Problem Statement
 
 Inflation forecasting remains a significant challenge due to changing economic conditions, policy interventions, and external shocks.
